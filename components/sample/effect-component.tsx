@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import Modal from '@/components/sample/modal-component';
+import DeleteConfirmation from '@/components/sample/delete-confirmation';
 
 interface Movie {
   id: string;
@@ -11,8 +13,7 @@ interface Movie {
 const EffectComponent = () => {
   const [data, setData] = useState<Movie[] | null>(null);
   const [counter, serCounter] = useState<number>(0);
-
-
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const fetchData = () => {
     fetch('https://dummyapi.online/api/movies')
@@ -33,13 +34,34 @@ const EffectComponent = () => {
     serCounter(counter + 1);
   }
 
+  const modalOnCancel = () => {
+    console.log('cancel');
+    setModalIsOpen(false);
+  }
+
+  const modalOnConfirm = () => {
+    console.log('confirm');
+    setModalIsOpen(false);
+  }
+
+  const openModal = () => {
+    console.log('open modal');
+    setModalIsOpen(!modalIsOpen);
+  }
+
   return <>
+    <Modal open={modalIsOpen} onClose={null}>
+      <DeleteConfirmation
+        onCancel={modalOnCancel}
+        onConfirm={modalOnConfirm}
+      />
+    </Modal>
     <button onClick={fetchData} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Refresh</button>
     <button onClick={incrementCounter} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Counter {counter}</button>
     <div>{data ? (
       data.map(movie => (
         <div key={movie.id} className="bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="p-4">
+          <div onClick={openModal} className="p-4">
             <h2 className="text-xl font-bold mb-2">{movie.movie}</h2>
             <p className="text-gray-700 mb-2">Rating: {movie.rating}</p>
             <a className="text-blue-500 hover:underline" href={movie.imdb_url}>IMDB</a>
@@ -48,7 +70,10 @@ const EffectComponent = () => {
       ))
     ) : (
       <p className="text-center text-gray-500">Loading...</p>
-    )}</div></>;
+    )}
+
+    </div>
+  </>;
 };
 
 export default EffectComponent;
