@@ -58,6 +58,12 @@ const EffectComponent = () => {
     </Modal>
     <button onClick={fetchData} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Refresh</button>
     <button onClick={incrementCounter} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Counter {counter}</button>
+    <button
+      onClick={() => window.location.href = '/sample/react-query'}
+      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+    >
+      go another page
+    </button>
     <div>{data ? (
       data.map(movie => (
         <div key={movie.id} className="bg-white shadow-md rounded-lg overflow-hidden">

@@ -6,7 +6,7 @@ const ConditionalComponent = () => {
   return (
     <div>
       <button onClick={() => setIsVisible(!isVisible)}>
-                Toggle Visibility
+        Toggle Visibility
       </button>
       {isVisible && <p>This is conditionally rendered</p>}
     </div>
