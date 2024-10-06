@@ -2,6 +2,7 @@
 "use client"; // 클라이언트 컴포넌트임을 명시합니다.
 import React from 'react';
 import { useMovies } from '@/hooks/useMovieApi';
+import Link from 'next/link';
 
 const ReactQueryComponent: React.FC = () => {
   const { data, error, isLoading, refetch } = useMovies();
@@ -22,12 +23,12 @@ const ReactQueryComponent: React.FC = () => {
       >
         refresh
       </button>
-      <button
-        onClick={() => window.location.href = '/sample/side-effect'}
+      {/* Link 컴포넌트를 사용하여 다른 페이지로 이동처리. a태그를 사용하면 화면이 리로드가 되므로 spa의 장점을 얻지 못함 */}
+      <Link href="/sample/side-effect"
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
       >
         go another page
-      </button>
+      </Link>
       {data ? (
         data.map(movie => (
           <div key={movie.id} className="bg-white shadow-md rounded-lg overflow-hidden">
