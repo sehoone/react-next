@@ -6,10 +6,17 @@ import Step1 from './step1';
 import Step2 from './step2';
 import Step3 from './step3';
 
+/**
+ * form 컴포넌트를 기준으로 스텝을 나누고, form에 대한 데이터는 useForm 훅을 사용하여 관리하고, FormProvider를 사용하여 하위 컴포넌트에 전달.
+ * 단계 정의: steps 배열을 사용하여 각 단계에서 수집할 필드를 정의.
+ * 상태 관리: useState를 사용하여 현재 단계(currentStep)와 이전 단계(previousStep)를 관리.
+ * 폼 상태 관리: useForm 훅을 사용하여 폼 상태를 관리하고, FormProvider를 사용하여 폼 상태를 하위 컴포넌트에 전달.
+ * 단계 전환 함수: next와 prev 함수를 정의하여 사용자가 다음 단계와 이전 단계로 이동할 수 있도록 처리.
+ * 폼 제출 함수: processForm 함수를 정의하여 모든 단계를 완료한 후 폼 데이터를 제출.
+ */
 export default function Form() {
   const {
     currentStep,
-    previousStep,
     delta,
     next,
     prev,
@@ -19,7 +26,7 @@ export default function Form() {
 
   return (
     <section className='absolute inset-0 flex flex-col justify-between p-24'>
-      {/* steps */}
+      {/* steps 헤더 영역*/}
       <nav aria-label='Progress'>
         <ol role='list' className='space-y-4 md:flex md:space-x-8 md:space-y-0'>
           {steps.map((step, index) => (
@@ -54,7 +61,7 @@ export default function Form() {
         </ol>
       </nav>
 
-      {/* Form */}
+      {/* Form 폼영역 */}
       <FormProvider {...methods}>
         <form className='mt-12 py-12' onSubmit={methods.handleSubmit(() => { })}>
           {currentStep === 0 && <Step1 delta={delta} />}
@@ -63,7 +70,7 @@ export default function Form() {
         </form>
       </FormProvider>
 
-      {/* Navigation */}
+      {/* Navigation 하단 푸터. 단계 이동처리*/}
       <div className='mt-8 pt-5'>
         <div className='flex justify-between'>
           <button
