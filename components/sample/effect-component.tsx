@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Modal from '@/components/sample/modal-component';
 import DeleteConfirmation from '@/components/sample/delete-confirmation';
+import Link from 'next/link';
 
 interface Movie {
   id: string;
@@ -58,12 +59,11 @@ const EffectComponent = () => {
     </Modal>
     <button onClick={fetchData} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Refresh</button>
     <button onClick={incrementCounter} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Counter {counter}</button>
-    <button
-      onClick={() => window.location.href = '/sample/react-query'}
+    <Link href="/sample/react-query"
       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
     >
       go another page
-    </button>
+    </Link>
     <div>{data ? (
       data.map(movie => (
         <div key={movie.id} className="bg-white shadow-md rounded-lg overflow-hidden">

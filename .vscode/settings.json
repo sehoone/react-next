@@ -11,5 +11,5 @@
   "eslint.format.enable": true,
   "editor.tabSize": 2,
   "editor.wordWrapColumn": 100,
-  "editor.formatOnSave": true // 이 줄을 추가하여 저장 시 자동 포맷팅 활성화
+  "editor.formatOnSave": true
 }

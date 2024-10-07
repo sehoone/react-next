@@ -23,6 +23,6 @@ export const useMovies = () => {
   return useQuery<Movie[], Error>({
     queryKey: ['movies'],
     queryFn: httpMovies,
-    staleTime: 1000 * 60 * 5, // 5분 동안 캐시된 데이터를 사용
+    staleTime: 1000 * 60 * 1, // 1분 동안 캐시된 데이터를 사용
   });
 };

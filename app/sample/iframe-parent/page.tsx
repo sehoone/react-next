@@ -33,9 +33,6 @@ const iframeParent = () => {
 
   return (
     <div className="p-4">
-      <Head>
-        <script src="/libs/hi2.js"></script>
-      </Head>
       <button className="mb-4 px-4 py-2 bg-blue-500 text-white rounded" onClick={sendMessageToIframe}>
         Send Message to Iframe
       </button>
