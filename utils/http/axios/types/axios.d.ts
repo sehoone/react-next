@@ -1,5 +1,8 @@
 export type ErrorMessageMode = 'none' | 'modal' | 'message' | undefined;
 
+// axios request header setter type
+type HeaderSetter = (config: any, authInfo: any) => void;
+
 // 요청 처리 옵션
 export interface RequestOptions {
   // Splicing request parameters to url
@@ -23,6 +26,8 @@ export interface RequestOptions {
   joinTime?: boolean;
   // Whether to send token in header
   withToken?: boolean;
+  // 인터페이스명
+  interfaceName?: string;
 }
 
 // API response

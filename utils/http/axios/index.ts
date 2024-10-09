@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { AxiosResponse } from 'axios';
-import type { RequestOptions, Result } from './types/axios';
+import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import type { HeaderSetter, RequestOptions, Result } from './types/axios';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { BaseAxios } from './baseAxios';
 import { RequestEnum, ContentTypeEnum, ResultEnum } from './enum/httpEnum';
@@ -8,6 +8,7 @@ import { isString } from '@/utils/is';
 import { deepMerge } from '@/utils';
 import { formatRequestDate } from './helper';
 import { logger } from '@/utils/logger';
+import { AuthInfoInterface } from './types/authModel';
 
 /**
  * @description: AxiosTransform
@@ -18,7 +19,7 @@ const transform: AxiosTransform = {
    */
   transformResponseHook: (res: AxiosResponse<Result>, options: RequestOptions) => {
     logger.debug('transformResponseHook start');
-    const { isReturnNativeResponse } = options;
+    const { isReturnNativeResponse, interfaceName } = options;
     logger.debug('transformResponseHook ' + res);
     // 서버응답 그대로 처리(axios 응답을 포함한 응답)
     if (isReturnNativeResponse) {
@@ -27,6 +28,9 @@ const transform: AxiosTransform = {
     if (!res) {
       // logger.debug(t('system.api.networkException'));
       // throw new Error(t('system.api.networkException'));
+    }
+    if (interfaceName === 'ca') {
+      // ca 서버 응답 처리
     }
     const data = res.data;
     const { rstCd, dta } = data;
@@ -99,8 +103,15 @@ const transform: AxiosTransform = {
   requestInterceptors: async (config, options) => {
     logger.debug('requestInterceptors start');
 
+    const authInfo = {};
     // API인증정보 세팅.
-    
+
+    // 인터페이스별 헤더값 설정
+    const interfaceName = options.requestOptions?.interfaceName;
+    if (interfaceName && headerSetters[interfaceName]) {
+      headerSetters[interfaceName](config, authInfo);
+    }
+
     logger.debug('requestInterceptors end');
     return config;
   },
@@ -151,29 +162,75 @@ const transform: AxiosTransform = {
   }
 };
 
+// axios 헤더값 설정
+const headerSetters: { [key: string]: HeaderSetter } = {
+  default: setDefaultHeaders,
+  ca: setCaHeaders,
+};
+
+// set 디폴트
+function setDefaultHeaders(config: InternalAxiosRequestConfig<any>, authInfo: AuthInfoInterface) {
+  config.headers['UUID'] = authInfo.uuid;
+  config.headers['name'] = authInfo.name;
+}
+
+// set CA 헤더값
+function setCaHeaders(config: InternalAxiosRequestConfig<any>, authInfo: AuthInfoInterface) {
+  config.headers['UUID'] = authInfo.uuid;
+}
+
+// axios 공통 옵션
+const commonBaseAxiosOpt = {
+  authenticationScheme: 'Bearer',
+  timeout: 10 * 1000,
+  transform,
+  withCredentials: true,
+  requestOptions: {
+    joinPrefix: false,
+    isReturnNativeResponse: false,
+    isTransformResponse: true,
+    joinParamsToUrl: false,
+    formatDate: true,
+    errorMessageMode: 'modal',
+    joinTime: true,
+    withToken: true,
+    retryMaxCount: 3,
+    retryCount: 0
+  }
+};
+
 /**
- * @description: axios 생성
+ * @description: 디폴트 axios 생성
  */
 function createAxios(opt?: Partial<CreateAxiosOptions>) {
   return new BaseAxios(
     deepMerge(
       {
-        authenticationScheme: 'Bearer',
-        timeout: 10 * 1000,
+        ...commonBaseAxiosOpt,
+        baseURL: 'http://localhost:3000',
         headers: { 'Content-Type': ContentTypeEnum.JSON },
-        transform,
-        // baseURL: '/api',
-        baseURL: 'https://dummyapi.online/api',
         requestOptions: {
-          joinPrefix: false,
-          isReturnNativeResponse: false,
-          isTransformResponse: true,
-          joinParamsToUrl: false,
-          formatDate: true,
-          errorMessageMode: 'message',
-          urlPrefix: 'api',
-          joinTime: true,
-          withToken: true
+          ...commonBaseAxiosOpt.requestOptions,
+          interfaceName: 'default'
+        }
+      },
+      opt || {}
+    )
+  );
+}
+
+// CA 서버 axios 생성
+function createCaAxios(opt?: Partial<CreateAxiosOptions>) {
+  return new BaseAxios(
+    deepMerge(
+      {
+        ...commonBaseAxiosOpt,
+        withCredentials: false,
+        baseURL: 'http://localhost:3001',
+        headers: { 'Content-Type': ContentTypeEnum.JSON, Accept: 'application/json;charset=UTF-8, text/plain, */*' },
+        requestOptions: {
+          ...commonBaseAxiosOpt.requestOptions,
+          interfaceName: 'ca'
         }
       },
       opt || {}
@@ -193,3 +250,17 @@ export const defHttp = createAxios();
  * ex. defHttpOpt({ timeout: 200 * 1000 }).get<HellowModel>({url: Api.GetHellowWorld,});
  */
 export const defHttpOpt = (opt?: Partial<CreateAxiosOptions>): BaseAxios => createAxios(opt);
+
+/**
+ * @description: caHttp
+ * axios 디폴트 CA 옵션으로 생성
+ * ex. caHttp.get<HellowModel>({ url: Api.GetHellowWorld });
+ */
+export const caHttp = createCaAxios();
+
+/**
+ * @description: caHttpOpt
+ * axios 커스텀 옵션으로 생성. 디폴트 설정에서 커스텀이 필요한 필드와 merge
+ * ex. caHttpOpt({ timeout: 200 * 1000 }).get<HellowModel>({url: Api.GetHellowWorld,});
+ */
+export const caHttpOpt = (opt?: Partial<CreateAxiosOptions>): BaseAxios => createCaAxios(opt);
