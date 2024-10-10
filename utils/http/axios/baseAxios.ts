@@ -1,5 +1,5 @@
 import type { AxiosRequestConfig, AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import type { RequestOptions, Result } from './types/axios';
+import type { DefaultResult, RequestOptions } from './types/axios';
 import type { CreateAxiosOptions } from './axiosTransform';
 import axios from 'axios';
 import qs from 'qs';
@@ -122,7 +122,7 @@ export class BaseAxios {
   /**
    * @description: axios common http 통신
    */
-  request<T = unknown>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
+  request<T = DefaultResult>(config: AxiosRequestConfig, options?: RequestOptions): Promise<T> {
     // 1. axios config 설정
     let conf: CreateAxiosOptions = cloneDeep(config);
     const transform = this.getTransform();
@@ -138,8 +138,8 @@ export class BaseAxios {
     // 2. axios request 처리
     return new Promise((resolve, reject) => {
       this.axiosInstance
-        .request<unknown, AxiosResponse<Result>>(conf)
-        .then((res: AxiosResponse<Result>) => {
+        .request<unknown, AxiosResponse<T>>(conf)
+        .then((res: AxiosResponse<T>) => {
           if (transformResponseHook && isFunction(transformResponseHook)) {
             try {
               // 2-1 axois request 성공 후 처리(응답 데이터 처리 및 실패 응답처리)

@@ -30,9 +30,40 @@ export interface RequestOptions {
   interfaceName?: string;
 }
 
+interface DataHeader {
+  trxCd: string;
+  globId: string;
+  reqMsgIlsi: string;
+  outMsgIlsi: string;
+  language: string;
+  subChannel: string;
+  result: string;
+  resultCode: string;
+  resultMsg: string | null;
+  resultDetail: string | null;
+  channelGbn: string;
+  submitGbn: string;
+  programId: string;
+  webProcGbn: string;
+  locale: string;
+  encG: number;
+  secChal1: string;
+  secChal2: string;
+  uuid: string;
+}
 // API response
-export interface Result<T = unknown> {
-  rstCd: string;
+// export interface Result<T = unknown> {
+//   rstCd: string;
+//   dta: T;
+//   errMsg: string;
+// }
+export interface DefaultResult<T = unknown> {
+  dataHeader: DataHeader;
+  dataBody: T;
+}
+
+// ca 서버 응답
+export interface CaResult<T = unknown> {
+  rstCd: number;
   dta: T;
-  errMsg: string;
 }

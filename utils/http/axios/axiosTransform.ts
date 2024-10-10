@@ -3,7 +3,7 @@
  * Data processing class, can be configured according to the project
  */
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import type { RequestOptions, Result } from './types/axios';
+import type { RequestOptions } from './types/axios';
 
 export interface CreateAxiosOptions extends AxiosRequestConfig {
   authenticationScheme?: string;
@@ -22,7 +22,7 @@ export abstract class AxiosTransform {
    * @description: Request 성공 후, 응답 데이터 처리.(axios response 인터셉터 호출된 이후 처리)
    * Request 성공 후, 공통 성공/실패 처리 및 데이터 포맷
    */
-  transformResponseHook?: (res: AxiosResponse<Result>, options: RequestOptions) => any;
+  transformResponseHook?: (res: AxiosResponse<unknown>, options: RequestOptions) => any;
 
   /**
    * @description: Request 실패 처리. axios http 실패

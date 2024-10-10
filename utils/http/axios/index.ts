@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import type { HeaderSetter, RequestOptions, Result } from './types/axios';
+import type { DefaultResult, HeaderSetter, RequestOptions } from './types/axios';
 import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { BaseAxios } from './baseAxios';
 import { RequestEnum, ContentTypeEnum, ResultEnum } from './enum/httpEnum';
@@ -17,7 +17,7 @@ const transform: AxiosTransform = {
   /**
    * @description: transformResponseHook
    */
-  transformResponseHook: (res: AxiosResponse<Result>, options: RequestOptions) => {
+  transformResponseHook: <T = DefaultResult>(res: AxiosResponse<T>, options: RequestOptions) => {
     logger.debug('transformResponseHook start');
     const { isReturnNativeResponse, interfaceName } = options;
     logger.debug('transformResponseHook ' + res);
@@ -29,20 +29,21 @@ const transform: AxiosTransform = {
       // logger.debug(t('system.api.networkException'));
       // throw new Error(t('system.api.networkException'));
     }
+    debugger;
+    logger.debug('interfaceName res' + res);
     if (interfaceName === 'ca') {
       // ca 서버 응답 처리
     }
-    const data = res.data;
-    const { rstCd, dta } = data;
-    const hasSuccess = data && rstCd === ResultEnum.SUCCESS;
-
-    if (hasSuccess) {
-      return dta;
+    const data = res as AxiosResponse<DefaultResult>;
+    const { dataHeader, dataBody } = data.data;
+    
+    if (dataHeader.result == "SUCCESS") {
+      return dataBody;
     }
 
-    // TODO 실패 코드 응답 처리
-    logger.debug('rstCd' + rstCd);
-    logger.debug('transformResponseHook end');
+    // // TODO 실패 코드 응답 처리
+    // logger.debug('rstCd' + rstCd);
+    // logger.debug('transformResponseHook end');
     return data;
   },
 
@@ -164,14 +165,12 @@ const transform: AxiosTransform = {
 
 // axios 헤더값 설정
 const headerSetters: { [key: string]: HeaderSetter } = {
-  default: setDefaultHeaders,
+  RIC: setDefaultHeaders,
   ca: setCaHeaders,
 };
 
 // set 디폴트
 function setDefaultHeaders(config: InternalAxiosRequestConfig<any>, authInfo: AuthInfoInterface) {
-  config.headers['UUID'] = authInfo.uuid;
-  config.headers['name'] = authInfo.name;
 }
 
 // set CA 헤더값
@@ -179,12 +178,39 @@ function setCaHeaders(config: InternalAxiosRequestConfig<any>, authInfo: AuthInf
   config.headers['UUID'] = authInfo.uuid;
 }
 
+export enum baseAxiosTypeEnum {
+  DEFAULT = 'DEFAULT',
+  CA = 'CA',
+}
+
+// axios baseUrl 설정
+export function getAxiosBaseUrl(baseAxiosType: baseAxiosTypeEnum): string {
+  const isDummy = process.env.NEXT_PUBLIC_IS_DUMMY || 'false';
+  if (isDummy === 'true') {
+    return '/dummy-server';
+  }
+
+  // 디폴트 서버
+  if (baseAxiosType === baseAxiosTypeEnum.DEFAULT) {
+    return process.env.NEXT_PUBLIC_RIC_URL || '';
+  }
+
+  // CA 서버
+  if (baseAxiosType === baseAxiosTypeEnum.CA) {
+    return process.env.NEXT_PUBLIC_CA_URL || '';
+  }
+
+  return '/';
+}
+
+
 // axios 공통 옵션
 const commonBaseAxiosOpt = {
-  authenticationScheme: 'Bearer',
+  authenticationScheme: '',
   timeout: 10 * 1000,
   transform,
   withCredentials: true,
+  headers: { 'Content-Type': ContentTypeEnum.JSON },
   requestOptions: {
     joinPrefix: false,
     isReturnNativeResponse: false,
@@ -207,11 +233,10 @@ function createAxios(opt?: Partial<CreateAxiosOptions>) {
     deepMerge(
       {
         ...commonBaseAxiosOpt,
-        baseURL: 'http://localhost:3000',
-        headers: { 'Content-Type': ContentTypeEnum.JSON },
+        baseURL: getAxiosBaseUrl(baseAxiosTypeEnum.DEFAULT),
         requestOptions: {
           ...commonBaseAxiosOpt.requestOptions,
-          interfaceName: 'default'
+          interfaceName: 'RIB'
         }
       },
       opt || {}
@@ -225,12 +250,12 @@ function createCaAxios(opt?: Partial<CreateAxiosOptions>) {
     deepMerge(
       {
         ...commonBaseAxiosOpt,
+        authenticationScheme: 'bearer',
         withCredentials: false,
-        baseURL: 'http://localhost:3001',
-        headers: { 'Content-Type': ContentTypeEnum.JSON, Accept: 'application/json;charset=UTF-8, text/plain, */*' },
+        baseURL: getAxiosBaseUrl(baseAxiosTypeEnum.CA),
         requestOptions: {
           ...commonBaseAxiosOpt.requestOptions,
-          interfaceName: 'ca'
+          interfaceName: 'CA'
         }
       },
       opt || {}
