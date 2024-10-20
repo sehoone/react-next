@@ -21,6 +21,7 @@ const menuItems: MenuItem[] = [
   },
   { title: 'page1', path: '/sample/sidebar/page1' },
   { title: 'page2', path: '/sample/sidebar/page2' },
+  { title: 'AtomCounter', path: '/sample/sidebar/atom-counter' },
 ];
 
 export default function Sidebar() {

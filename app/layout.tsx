@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import 'jotai-devtools/styles.css';
 import "./globals.css";
 import Providers from "./query-client-provider";
 
