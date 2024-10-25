@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    image: httpd:latest
+    container_name: next-react
+    ports:
+      - "8400:80"
+    volumes:
+      - ./html:/usr/local/apache2/htdocs/
+    networks:
+      - webnet
+
+networks:
+  webnet:
