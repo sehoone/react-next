@@ -11,6 +11,7 @@ const nextConfig = {
   },
   transpilePackages: ['jotai-devtools'],
   output: 'export', // 빌드된 파일을 /out 디렉토리에 넣기 위한 설정
+  basePath: process.env.BASE_PATH || '',
 };
 
 export default nextConfig;
