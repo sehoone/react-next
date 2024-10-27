@@ -9,6 +9,8 @@ import { deepMerge } from '@/utils';
 import { formatRequestDate } from './helper';
 import { logger } from '@/utils/logger';
 import { AuthInfoInterface } from './types/authModel';
+import { modalContentAtom } from '@/atoms/commonAtom';
+import { getDefaultStore } from 'jotai';
 
 /**
  * @description: AxiosTransform
@@ -36,13 +38,14 @@ const transform: AxiosTransform = {
     }
     const data = res as AxiosResponse<DefaultResult>;
     const { dataHeader, dataBody } = data.data;
-    
+
     if (dataHeader.result == "SUCCESS") {
       return dataBody;
     }
 
     // // TODO 실패 코드 응답 처리
-    // logger.debug('rstCd' + rstCd);
+
+
     // logger.debug('transformResponseHook end');
     return data;
   },
@@ -149,6 +152,10 @@ const transform: AxiosTransform = {
     } catch (error) {
       throw new Error(error as unknown as string);
     }
+    logger.debug('fail');
+    const store = getDefaultStore();
+    store.set(modalContentAtom, `API 통신 실패: ${error.message}`);
+
     // alert('네트워크 오류 ' + error.message);
     logger.debug('responseInterceptorsCatch end');
     return Promise.reject(error);

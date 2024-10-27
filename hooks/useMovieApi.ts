@@ -24,6 +24,7 @@ export const useMovies = (options?: UseQueryOptions<Movie[], Error>) => {
     queryKey: ['movies'],
     queryFn: httpMovies,
     staleTime: 1000 * 60 * 1, // 1분 동안 캐시된 데이터를 사용
+    retry: false, // 실패시 재시도 횟수
     ...options, // 전달된 옵션을 병합합니다.
   });
 };
