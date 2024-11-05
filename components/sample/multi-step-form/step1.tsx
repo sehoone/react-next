@@ -1,8 +1,15 @@
+// "use client";
 import { motion } from 'framer-motion';
 import { useFormContext } from 'react-hook-form';
 
 export default function Step1({ delta }: { delta: number }) {
-  const { register, formState: { errors } } = useFormContext();
+  const { register, setValue, formState: { errors } } = useFormContext();
+
+  const handleLastNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    const englishOnlyValue = value.replace(/[^a-zA-Z\s]/g, ''); // 영문과 공백만 남기고 제거
+    setValue('lastName', englishOnlyValue); // react-hook-form의 setValue를 사용하여 값 설정
+  };
 
   return (
     <motion.div
@@ -54,6 +61,7 @@ export default function Step1({ delta }: { delta: number }) {
               {...register('lastName')}
               autoComplete='family-name'
               className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-sky-600 sm:text-sm sm:leading-6'
+              onChange={handleLastNameChange}
             />
             {errors.lastName?.message && (
               <p className='mt-2 text-sm text-red-400'>
